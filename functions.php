@@ -72,12 +72,12 @@ function log_uncaught_exception($e, $extra_args = array(), $extra_query = "") {
   } catch (Exception $e) {
     $serialized = $e->getMessage() . ": " . print_r($e, true);
   }
-  return $q->execute(array_join(array(
+  return $q->execute(array(
     // clamp messages to 255 characters
     mb_substr($e->getMessage(), 0, 255),
     mb_substr($e->getPrevious() ? $e->getPrevious()->getMessage() : "", 0, 255),
     mb_substr($e->getFile(), 0, 255),
     $e->getLine(),
     mb_substr($serialized, 0, 65535),
-  ), $extra_args));
+  ) + $extra_args);
 }
