@@ -17,14 +17,14 @@ class UncaughtExceptionsMigration extends \Db\Migration {
       previous_message varchar(255) null,
       class_name varchar(255) null,
       filename varchar(255) null,
-      line_number rint null,
+      line_number int null,
       raw blob null,
 
       argument_id int null,
       argument_type varchar(255) null,
 
-      INDEX(job_id),
-      INDEX(class_name)
+      INDEX(class_name),
+      INDEX(argument_type, argument_id)
     );");
     return $q->execute();
   }
