@@ -1,9 +1,11 @@
 <?php
 
+namespace Openclerk;
+
 /**
  * Represents an exception that can have an additional argument.
  */
-interface WrappedArgumentException {
+interface TypedException {
 
   /**
    * @return an integer

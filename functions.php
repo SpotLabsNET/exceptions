@@ -6,9 +6,6 @@ if (!function_exists('db')) {
 }
 
 function openclerk_exceptions_exception_handler($e) {
-  $extra_args = array();
-  $extra_query = "";
-
   header('HTTP/1.0 500 Internal Server Error');
   // TODO
   // if (function_exists('my_content_type_exception_handler')) {
@@ -23,7 +20,7 @@ function openclerk_exceptions_exception_handler($e) {
   // }
 
   // logging
-  log_uncaught_exception($e, $extra_args, $extra_query);
+  log_uncaught_exception($e);
   die;
 }
 
@@ -44,17 +41,19 @@ function openclerk_exceptions_fatal_handler() {
 
 register_shutdown_function('openclerk_exceptions_fatal_handler');
 
-function log_uncaught_exception($e, $extra_args = array(), $extra_query = "") {
+function log_uncaught_exception($e) {
   // events
   \Openclerk\Events::trigger('exception_uncaught', $e);
 
+  $extra_args = array();
+  $extra_query = "";
+
   // logging
-  if ($e instanceof \Openclerk\WrappedArgumentException) {
+  if ($e instanceof \Openclerk\TypedException) {
     // unwrap it
     $extra_args[] = $e->getArgumentId();
     $extra_args[] = $e->getArgumentType();
     $extra_query .= ", argument_id=?, argument_type=?";
-    $e = $e->getCause();
   }
   if (get_class($e) !== false) {
     $extra_args[] = get_class($e);
@@ -72,12 +71,15 @@ function log_uncaught_exception($e, $extra_args = array(), $extra_query = "") {
   } catch (Exception $e) {
     $serialized = $e->getMessage() . ": " . print_r($e, true);
   }
-  return $q->execute(array(
+
+  $args = array_merge(array(
     // clamp messages to 255 characters
     mb_substr($e->getMessage(), 0, 255),
     mb_substr($e->getPrevious() ? $e->getPrevious()->getMessage() : "", 0, 255),
     mb_substr($e->getFile(), 0, 255),
     $e->getLine(),
     mb_substr($serialized, 0, 65535),
-  ) + $extra_args);
+  ), $extra_args);
+
+  return $q->execute($args);
 }
