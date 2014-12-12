@@ -1,0 +1,14 @@
+{
+  "name": "openclerk/exceptions",
+  "require": {
+    "openclerk/db": "dev-master",
+    "openclerk/config": "dev-master",
+    "openclerk/events": "dev-master"
+  },
+  "autoload": {
+    "files": ["functions.php"],
+    "psr-4": {
+      "Openclerk\\": "src"
+    }
+  }
+}
