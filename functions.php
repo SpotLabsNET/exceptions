@@ -68,8 +68,12 @@ function log_uncaught_exception($e) {
     created_at=NOW() $extra_query");
   try {
     $serialized = serialize($e);
-  } catch (Exception $e) {
-    $serialized = $e->getMessage() . ": " . print_r($e, true);
+  } catch (Exception $e2) {
+    if (preg_match("#Serialization of .+ is not allowed#im", $e2->getMessage())) {
+      $serialized = serialize($e2->getMessage());
+    } else {
+      $serialized = serialize($e->getMessage());
+    }
   }
 
   $args = array_merge(array(
@@ -97,7 +101,11 @@ function print_exception_trace($e) {
   echo "<li><b>" . htmlspecialchars($e->getMessage()) . "</b> (<i>" . get_class($e) . "</i>)</li>\n";
   echo "<li>" . htmlspecialchars($e->getFile()) . "#" . htmlspecialchars($e->getLine()) . "</li>\n";
   foreach ($e->getTrace() as $e2) {
-    echo "<li>" . htmlspecialchars($e2['file']) . "#" . htmlspecialchars($e2['line']) . ": " . htmlspecialchars($e2['function']);
+    echo "<li>";
+    echo isset($e2['file']) ? htmlspecialchars($e2['file']) : "<i>unknown</i>";
+    echo "#";
+    echo isset($e2['line']) ? htmlspecialchars($e2['line']) : "<i>unknown</i>";
+    echo ": " . htmlspecialchars($e2['function']);
     if (isset($e2['args'])) {
       echo htmlspecialchars(format_exception_args_list($e2['args']));
     }
