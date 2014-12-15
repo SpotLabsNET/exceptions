@@ -1,8 +1,11 @@
 <?php
 
-if (!function_exists('db')) {
-  // this is because we don't have a reference to a \Db\Connection at the time of exceptions
-  throw new \Openclerk\ExceptionsException("db() function needs to be defined to use openclerk/exceptions");
+function openclerk_exceptions_check_db() {
+  if (!function_exists('db')) {
+    // this is because we don't have a reference to a \Db\Connection at the time of exceptions
+    throw new \Openclerk\ExceptionsException("db() function needs to be defined to use openclerk/exceptions");
+  }
+  return db();
 }
 
 function openclerk_exceptions_exception_handler($e) {
@@ -42,6 +45,9 @@ function openclerk_exceptions_fatal_handler() {
 register_shutdown_function('openclerk_exceptions_fatal_handler');
 
 function log_uncaught_exception($e) {
+  // check db() is defined
+  $db = openclerk_exceptions_check_db();
+
   // events
   \Openclerk\Events::trigger('exception_uncaught', $e);
 
@@ -59,7 +65,7 @@ function log_uncaught_exception($e) {
     $extra_args[] = get_class($e);
     $extra_query .= ", class_name=?";
   }
-  $q = db()->prepare("INSERT INTO uncaught_exceptions SET
+  $q = $db->prepare("INSERT INTO uncaught_exceptions SET
     message=?,
     previous_message=?,
     filename=?,
