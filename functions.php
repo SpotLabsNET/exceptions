@@ -1,14 +1,19 @@
 <?php
 
-use \Openclerk\Exceptions\ExceptionException;
+use \Openclerk\Exceptions\ExceptionsException;
 use \Openclerk\Exceptions\FatalException;
 use \Openclerk\Config;
 use \Openclerk\Events;
 
-function openclerk_exceptions_check_db() {
+/**
+ * Check that the {@link db()} function is defined; if not,
+ * throws a {@link ExceptionsException} with the original exception wrapped.
+ */
+function openclerk_exceptions_check_db($original) {
   if (!function_exists('db')) {
     // this is because we don't have a reference to a \Db\Connection at the time of exceptions
-    throw new ExceptionsException("db() function needs to be defined to use openclerk/exceptions");
+    $previous = $original instanceof \Exception ? $original : new \Exception("Wrapped fatal exception");
+    throw new ExceptionsException("db() function needs to be defined to use openclerk/exceptions", $previous);
   }
   return db();
 }
@@ -52,7 +57,7 @@ register_shutdown_function('openclerk_exceptions_fatal_handler');
 
 function log_uncaught_exception($e) {
   // check db() is defined
-  $db = openclerk_exceptions_check_db();
+  $db = openclerk_exceptions_check_db($e);
 
   // events
   Events::trigger('exception_uncaught', $e);

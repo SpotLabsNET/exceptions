@@ -1,6 +1,6 @@
 <?php
 
-namespace \Openclerk\Exceptions;
+namespace Openclerk\Exceptions;
 
 /**
  * Represents an exception that can have an additional argument.
