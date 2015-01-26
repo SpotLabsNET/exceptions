@@ -1,9 +1,14 @@
 <?php
 
+use \Openclerk\Exceptions\ExceptionException;
+use \Openclerk\Exceptions\FatalException;
+use \Openclerk\Config;
+use \Openclerk\Events;
+
 function openclerk_exceptions_check_db() {
   if (!function_exists('db')) {
     // this is because we don't have a reference to a \Db\Connection at the time of exceptions
-    throw new \Openclerk\ExceptionsException("db() function needs to be defined to use openclerk/exceptions");
+    throw new ExceptionsException("db() function needs to be defined to use openclerk/exceptions");
   }
   return db();
 }
@@ -15,7 +20,7 @@ function openclerk_exceptions_exception_handler($e) {
   //   my_content_type_exception_handler($e);
   // } else {
     echo "Error: " . htmlspecialchars($e->getMessage());
-    if (\Openclerk\Config::get('display_errors', false)) {
+    if (Config::get('display_errors', false)) {
       // only display trace locally
       echo "<br>Trace:";
       print_exception_trace($e);
@@ -35,10 +40,10 @@ set_exception_handler('openclerk_exceptions_exception_handler');
 function openclerk_exceptions_fatal_handler() {
   $error = error_get_last();
   if ($error['type'] == E_ERROR || $error['type'] == E_CORE_ERROR || $error['type'] == E_COMPILE_ERROR) {
-    log_uncaught_exception(new \Openclerk\FatalException($error));
+    log_uncaught_exception(new \FatalException($error));
 
     // events
-    \Openclerk\Events::trigger('exception_fatal', $error);
+    Events::trigger('exception_fatal', $error);
   }
 }
 
@@ -49,7 +54,7 @@ function log_uncaught_exception($e) {
   $db = openclerk_exceptions_check_db();
 
   // events
-  \Openclerk\Events::trigger('exception_uncaught', $e);
+  Events::trigger('exception_uncaught', $e);
 
   $extra_args = array();
   $extra_query = "";

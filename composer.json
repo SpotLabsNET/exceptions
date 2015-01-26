@@ -8,7 +8,7 @@
   "autoload": {
     "files": ["functions.php"],
     "psr-4": {
-      "Openclerk\\": "src"
+      "Openclerk\\Exceptions\\": "src"
     }
   }
 }

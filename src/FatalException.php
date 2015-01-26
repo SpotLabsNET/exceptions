@@ -1,6 +1,6 @@
 <?php
 
-namespace Openclerk;
+namespace Openclerk\Exceptions;
 
 class FatalException /* cannot extend Exception, since getMessage() etc are final */ implements TypedException {
   var $wrapped;
