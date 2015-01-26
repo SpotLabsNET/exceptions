@@ -1,6 +1,6 @@
 <?php
 
-class EmailsComponentTest extends \ComponentTests\ComponentTest {
+class ExceptionsComponentTest extends \ComponentTests\ComponentTest {
 
   function getRoots() {
     return array(__DIR__ . "/..");
