@@ -1,6 +1,6 @@
 <?php
 
-namespace Openclerk\Exceptions;
+namespace \Openclerk\Exceptions;
 
 class UncaughtExceptionsMigration extends \Db\Migration {
 

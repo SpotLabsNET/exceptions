@@ -35,12 +35,13 @@ function openclerk_exceptions_exception_handler($e) {
 set_exception_handler('openclerk_exceptions_exception_handler');
 
 /**
- * Allows for capturing fatal errors (missing includes, undefined functions etc)
+ * Allows for capturing fatal errors (missing includes, undefined functions etc).
+ * Creates a new {@link FatalException} that wraps the PHP fatal error.
  */
 function openclerk_exceptions_fatal_handler() {
   $error = error_get_last();
   if ($error['type'] == E_ERROR || $error['type'] == E_CORE_ERROR || $error['type'] == E_COMPILE_ERROR) {
-    log_uncaught_exception(new \FatalException($error));
+    log_uncaught_exception(new FatalException($error));
 
     // events
     Events::trigger('exception_fatal', $error);
