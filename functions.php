@@ -55,7 +55,15 @@ function openclerk_exceptions_fatal_handler() {
 
 register_shutdown_function('openclerk_exceptions_fatal_handler');
 
-function log_uncaught_exception($e) {
+/**
+ * Log an Exception into the {@code uncaught_exceptions} table.
+ * If the exception is a {@link TypedException}, or the {@code argument_id} and
+ * {@code argument_type} parameters are provided, this argument ID/type will be inserted as well.
+ *
+ * @param $argument_id optional argument type
+ * @param $argmuent_type optional argument id
+ */
+function log_uncaught_exception($e, $argument_type = null, $argument_id = null) {
   // check db() is defined
   $db = openclerk_exceptions_check_db($e);
 
@@ -66,12 +74,18 @@ function log_uncaught_exception($e) {
   $extra_query = "";
 
   // logging
-  if ($e instanceof \Openclerk\TypedException) {
+  if ($argument_id !== null && $argument_type !== null) {
+    // unwrap it
+    $extra_args[] = $argument_id;
+    $extra_args[] = $argument_type;
+    $extra_query .= ", argument_id=?, argument_type=?";
+  } else if ($e instanceof \Openclerk\TypedException) {
     // unwrap it
     $extra_args[] = $e->getArgumentId();
     $extra_args[] = $e->getArgumentType();
     $extra_query .= ", argument_id=?, argument_type=?";
   }
+
   if (get_class($e) !== false) {
     $extra_args[] = get_class($e);
     $extra_query .= ", class_name=?";
@@ -85,7 +99,7 @@ function log_uncaught_exception($e) {
     created_at=NOW() $extra_query");
   try {
     $serialized = serialize($e);
-  } catch (Exception $e2) {
+  } catch (\Exception $e2) {
     if (preg_match("#Serialization of .+ is not allowed#im", $e2->getMessage())) {
       $serialized = serialize($e2->getMessage());
     } else {
