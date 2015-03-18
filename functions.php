@@ -25,7 +25,7 @@ function openclerk_exceptions_exception_handler($e) {
   //   my_content_type_exception_handler($e);
   // } else {
     echo "Error: " . htmlspecialchars($e->getMessage());
-    if (Config::get('display_errors', false)) {
+    if (!Config::isEmpty() && Config::get('display_errors', false)) {
       // only display trace locally
       echo "<br>Trace:";
       print_exception_trace($e);
